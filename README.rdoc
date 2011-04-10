@@ -105,3 +105,14 @@ More reading about pagination as design pattern:
 Want to discuss, request features, ask questions? Join the
 {Google group}[http://groups.google.com/group/will_paginate].
 
+== Adding CouchFoo support
+
+<harikrishnan83> This is an experiment and I have to test some more.
+
+At the moment you should be able to use as you would normally use ActiveRecord and WillPaginate but for two things.
+
+1. The order does not work. You may have to mention that as part of the model with CouchFoo. Also there are some tricky bits about order. Read more about the same on CouchFoo.
+2. I am not sure why it does not pick up the right "total_entries" except for when you send a request for the last page. The result of this is that you will not see the Prev/Next and page numbers unless you explicitly mention the :total_entries as shown below.
+
+Report.paginate(:page=>params[:page],:per_page=>10,:total_entries=>Report.all.count)
+

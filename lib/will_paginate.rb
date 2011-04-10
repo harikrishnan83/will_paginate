@@ -14,6 +14,7 @@ module WillPaginate
     def enable
       enable_actionpack
       enable_activerecord
+      enable_couchfoo
     end
     
     # hooks WillPaginate::ViewHelpers into ActionView::Base
@@ -57,6 +58,22 @@ module WillPaginate
       end
     end
 
+    # hooks WillPaginate::Finder into ActiveRecord::Base and classes that deal
+    # with associations
+    def enable_couchfoo
+      return if CouchFoo::Base.respond_to? :paginate
+      require 'will_paginate/finder'
+      CouchFoo::Base.send :include, Finder
+
+      # support pagination on associations
+      a = CouchFoo::Associations
+      [ a::AssociationCollection ].each do |klass|
+        klass.send :include, Finder::ClassMethods
+        klass.class_eval { alias_method_chain :method_missing, :paginate }
+      end
+      
+    end
+
     # Enable named_scope, a feature of Rails 2.1, even if you have older Rails
     # (tested on Rails 2.0.2 and 1.2.6).
     #
@@ -86,5 +103,6 @@ end
 
 if defined? Rails
   WillPaginate.enable_activerecord if defined? ActiveRecord
+  WillPaginate.enable_couchfoo if defined? CouchFoo
   WillPaginate.enable_actionpack if defined? ActionController
 end
